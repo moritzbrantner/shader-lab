@@ -27,9 +27,9 @@ impl GpuState {
         size.width = size.width.max(1);
         size.height = size.height.max(1);
 
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_with_display_handle_from_env(
-            Box::new(display_handle),
-        ));
+        let instance = wgpu::Instance::new(
+            wgpu::InstanceDescriptor::new_with_display_handle_from_env(Box::new(display_handle)),
+        );
         let surface = instance
             .create_surface(window.clone())
             .map_err(|error| error.to_string())?;
@@ -78,12 +78,12 @@ impl GpuState {
                 module: &shader,
                 entry_point: Some("vs_main"),
                 buffers: &[],
-                compilation_options: Default::default(),
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
                 entry_point: Some("fs_main"),
-                compilation_options: Default::default(),
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
                 targets: &[Some(format.into())],
             }),
             primitive: wgpu::PrimitiveState::default(),
