@@ -20,10 +20,10 @@ apt = [
 ]
 
 [setup]
-commands = ["cargo fetch --locked"]
+commands = ["cargo fetch"]
 
 [maintenance]
-commands = ["cargo fetch --locked"]
+commands = ["cargo fetch"]
 
 [cache]
 paths = ["~/.cargo", "target"]
