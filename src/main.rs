@@ -47,9 +47,6 @@ impl GpuState {
                 required_features: wgpu::Features::empty(),
                 required_limits: wgpu::Limits::downlevel_webgl2_defaults()
                     .using_resolution(adapter.limits()),
-                default_queue: wgpu::QueueDescriptor {
-                    label: Some("shader-lab queue"),
-                },
                 experimental_features: wgpu::ExperimentalFeatures::disabled(),
                 memory_hints: wgpu::MemoryHints::MemoryUsage,
                 trace: wgpu::Trace::Off,
