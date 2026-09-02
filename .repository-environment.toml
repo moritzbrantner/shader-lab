@@ -1,0 +1,31 @@
+schema_version = 1
+
+[policy]
+track = "latest-stable"
+
+[system]
+apt = [
+  "libvulkan1",
+  "mesa-vulkan-drivers",
+  "vulkan-tools",
+  "pkg-config",
+  "libwayland-dev",
+  "libxkbcommon-dev",
+  "libxkbcommon-x11-dev",
+  "libx11-xcb-dev",
+  "libxrandr-dev",
+  "libxi-dev",
+  "libxcursor-dev",
+  "libxinerama-dev",
+]
+
+[setup]
+commands = ["cargo fetch --locked"]
+
+[maintenance]
+commands = ["cargo fetch --locked"]
+
+[cache]
+paths = ["~/.cargo", "target"]
+
+[compatibility_holds]
