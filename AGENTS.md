@@ -6,8 +6,10 @@
 
 ## Boundaries
 
-- Keep the initial implementation native Rust + `wgpu` + WGSL.
-- Do not add React, Three.js, WASM, or another `moritzbrantner/*` dependency during the initial four-PR horizon.
+- Keep native Rust + `wgpu` + WGSL as the reference implementation path for rendering experiments.
+- GitHub Pages may use dependency-free browser WebGPU for explanations, small equivalent experiments, WGSL editing, and capability analysis when that makes the GPU boundary easier to inspect.
+- Do not add React, Three.js, WASM, or another `moritzbrantner/*` dependency without a concrete experiment need. WASM should be introduced when sharing Rust implementation is valuable, not merely to bridge to the browser.
+- Keep native and browser experiments conceptually aligned. When code is intentionally duplicated across presentation surfaces, keep the source relationship obvious enough that later divergence can be detected and repaired.
 - Use an established math crate rather than turning this repository into a linear-algebra implementation project.
 - Keep deterministic correctness checks independent of a physical GPU where practical: validate shader source and CPU-side layout/math without requiring display hardware.
 - Hardware/driver performance evidence is canary evidence until a controlled benchmark environment exists.
