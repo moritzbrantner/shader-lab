@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Compile and edit live WGSL fragment shaders with WebGPU in Shader Lab." />
+    <title>Live shader experiment · Shader Lab</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="../">shader-lab</a>
+        <nav class="site-nav" aria-label="Shader Lab">
+          <a href="../explain/">Explanation</a>
+          <a aria-current="page" href="./">Experiment</a>
+          <a href="../analysis/">Analysis</a>
+          <a href="https://github.com/moritzbrantner/shader-lab">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="shell experiment-shell">
+      <section class="experiment-heading">
+        <div>
+          <p class="eyebrow">Experiment · live WebGPU</p>
+          <h1>Edit the fragment shader.</h1>
+          <p class="lede" id="experiment-question">How do interpolated coordinates become fragment color?</p>
+        </div>
+        <div class="experiment-status">
+          <span class="state-pill" id="compile-status" data-state="working">Initializing WebGPU…</span>
+          <span class="muted">Edits stay local to this browser tab.</span>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Live shader workspace">
+        <div class="render-panel">
+          <canvas id="shader-canvas" aria-label="Live WebGPU shader output"></canvas>
+          <dl class="render-metrics">
+            <div><dt>CPU frame work</dt><dd id="frame-metric">—</dd></div>
+            <div><dt>Render resolution</dt><dd id="resolution-metric">—</dd></div>
+            <div><dt>Adapter</dt><dd id="adapter-metric">—</dd></div>
+          </dl>
+          <p class="fine-print">“CPU frame work” measures JavaScript-side encode/submit time, not GPU execution time. It is diagnostic context, not a GPU benchmark.</p>
+        </div>
+
+        <div class="editor-panel">
+          <div class="toolbar">
+            <label>Preset
+              <select id="preset"></select>
+            </label>
+            <label>Speed
+              <input id="speed" type="range" min="0" max="3" step="0.05" value="1" />
+            </label>
+            <div class="toolbar-actions">
+              <button class="button primary" id="compile" type="button">Compile</button>
+              <button class="button" id="pause" type="button" aria-pressed="false">Pause</button>
+              <button class="button" id="reset" type="button">Reset</button>
+            </div>
+          </div>
+          <label class="editor-label" for="shader-source">WGSL source</label>
+          <textarea id="shader-source" spellcheck="false" autocomplete="off" aria-describedby="editor-hint"></textarea>
+          <p class="fine-print" id="editor-hint">Keep <code>vs_main</code>, <code>fs_main</code>, and the binding contract unless you intentionally want pipeline creation to fail.</p>
+        </div>
+      </section>
+
+      <section class="diagnostic-panel" aria-labelledby="diagnostics-title">
+        <div class="section-copy">
+          <p class="eyebrow">Compiler evidence</p>
+          <h2 id="diagnostics-title">WGSL diagnostics</h2>
+        </div>
+        <ul id="diagnostics" class="diagnostics"><li>Waiting for the first compilation.</li></ul>
+      </section>
+
+      <section class="section cards three-up" aria-label="What this experiment exposes">
+        <article class="card"><span>Uniforms</span><h3>CPU → GPU data</h3><p>Resolution, time, speed, and pointer position are written to one uniform buffer every active frame.</p></article>
+        <article class="card"><span>Pipeline</span><h3>Typed shader contract</h3><p>Compilation and pipeline creation are explicit. A broken edit reports diagnostics instead of silently replacing the last working pipeline.</p></article>
+        <article class="card"><span>Rasterization</span><h3>One full-screen triangle</h3><p>The vertex stage emits three positions; the fragment stage determines the color of every covered pixel.</p></article>
+      </section>
+    </main>
+    <footer class="site-footer">This page uses browser WebGPU directly. Native wgpu remains the repository's reference implementation path.</footer>
+    <script type="module" src="../demo.js"></script>
+  </body>
+</html>

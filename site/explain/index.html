@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A visual explanation of the WebGPU rendering pipeline used by Shader Lab." />
+    <title>Pipeline explanation · Shader Lab</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="../">shader-lab</a>
+        <nav class="site-nav" aria-label="Shader Lab">
+          <a aria-current="page" href="./">Explanation</a>
+          <a href="../demo/">Experiment</a>
+          <a href="../analysis/">Analysis</a>
+          <a href="https://github.com/moritzbrantner/shader-lab">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="shell narrow-flow">
+      <section class="hero compact-hero">
+        <p class="eyebrow">Explanation · one rendered frame</p>
+        <h1>From JavaScript to pixels.</h1>
+        <p class="lede">The browser does not “run a shader” by itself. A frame appears only after several contracts line up: device capabilities, resource layouts, WGSL entry points, render state, encoded commands, and a presentable surface.</p>
+      </section>
+
+      <section class="section">
+        <div class="section-copy">
+          <p class="eyebrow">Pipeline map</p>
+          <h2>Six boundaries worth naming</h2>
+        </div>
+        <ol class="flow-list">
+          <li><span>01</span><div><h3>Adapter → device</h3><p>The adapter describes a candidate GPU implementation and its limits. The device is the logical GPU connection used to create resources and submit work.</p></div></li>
+          <li><span>02</span><div><h3>Canvas → surface format</h3><p>The WebGPU canvas context is configured with a device and preferred texture format. Each frame supplies a texture that can become a color attachment.</p></div></li>
+          <li><span>03</span><div><h3>WGSL → shader module</h3><p>WGSL source defines typed entry points. Shader Lab asks the browser for compilation diagnostics before replacing the currently working pipeline.</p></div></li>
+          <li><span>04</span><div><h3>Bindings → pipeline layout</h3><p>The uniform buffer is not discovered magically. A bind-group layout declares which resource exists at binding 0 and which shader stages may read it.</p></div></li>
+          <li><span>05</span><div><h3>Commands → render pass</h3><p>The CPU encodes a pass, selects the pipeline and bind group, and records a draw of three vertices. No vertex buffer is needed for the full-screen triangle because the vertex index generates its positions.</p></div></li>
+          <li><span>06</span><div><h3>Queue → presentation</h3><p>The command buffer is submitted to the device queue. WebGPU schedules the GPU work, the canvas texture receives the fragment output, and the browser presents it.</p></div></li>
+        </ol>
+      </section>
+
+      <section class="section split-panel">
+        <div>
+          <p class="eyebrow">CPU side</p>
+          <h2>What changes each frame?</h2>
+          <p>Shader Lab writes eight 32-bit floats into one 32-byte uniform buffer: resolution, elapsed time, animation speed, pointer position, and padding required by the layout.</p>
+          <pre><code>resolution  vec2&lt;f32&gt;   8 bytes
+time        f32          4 bytes
+speed       f32          4 bytes
+pointer     vec2&lt;f32&gt;   8 bytes
+padding     vec2&lt;f32&gt;   8 bytes
+                         ────────
+                         32 bytes</code></pre>
+        </div>
+        <div>
+          <p class="eyebrow">GPU side</p>
+          <h2>Why only three vertices?</h2>
+          <p>A single oversized triangle covers the viewport. Every covered pixel invokes the fragment shader, so the experiment can focus on fragment math and uniforms without introducing vertex buffers yet.</p>
+          <pre><code>@vertex
+fn vs_main(@builtin(vertex_index) id: u32)
+  -&gt; VertexOutput
+
+@fragment
+fn fs_main(input: VertexOutput)
+  -&gt; @location(0) vec4&lt;f32&gt;</code></pre>
+        </div>
+      </section>
+
+      <section class="section callout">
+        <p class="eyebrow">Next</p>
+        <h2>Make the model falsifiable.</h2>
+        <p>Open the live experiment, change the shader, introduce a WGSL error, move the pointer, and watch which boundary reacts. The goal is not just a pretty image; it is being able to predict what the pipeline will do.</p>
+        <a class="button primary" href="../demo/">Open the experiment</a>
+      </section>
+    </main>
+    <footer class="site-footer">Shader Lab explanations describe contracts that should remain recognizable across native wgpu and browser WebGPU paths.</footer>
+  </body>
+</html>

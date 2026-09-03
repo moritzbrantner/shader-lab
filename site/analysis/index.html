@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Inspect WebGPU adapter features and limits in Shader Lab." />
+    <title>GPU adapter analysis · Shader Lab</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="../">shader-lab</a>
+        <nav class="site-nav" aria-label="Shader Lab">
+          <a href="../explain/">Explanation</a>
+          <a href="../demo/">Experiment</a>
+          <a aria-current="page" href="./">Analysis</a>
+          <a href="https://github.com/moritzbrantner/shader-lab">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="shell narrow-flow">
+      <section class="hero compact-hero">
+        <p class="eyebrow">Analysis · current browser adapter</p>
+        <h1>What can this GPU path expose?</h1>
+        <p class="lede">A renderer should derive its operating envelope from capabilities instead of assuming one machine's limits are universal.</p>
+      </section>
+
+      <section class="section analysis-summary-card">
+        <div>
+          <span class="state-pill" id="analysis-status" data-state="working">Inspecting adapter…</span>
+          <p id="analysis-summary">Requesting a WebGPU adapter from this browser.</p>
+        </div>
+        <dl class="single-metric"><dt>Preferred canvas format</dt><dd id="preferred-format">—</dd></dl>
+      </section>
+
+      <section class="section analysis-grid">
+        <div>
+          <div class="section-copy">
+            <p class="eyebrow">Limits</p>
+            <h2>Selected adapter limits</h2>
+            <p>These bounds affect resource layouts, texture sizes, vertex inputs, and compute workgroup design.</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Limit</th><th scope="col">Reported value</th></tr></thead>
+              <tbody id="limits-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="section-copy">
+            <p class="eyebrow">Optional features</p>
+            <h2>Adapter feature set</h2>
+            <p>Optional WebGPU features should be requested only when an experiment actually needs them.</p>
+          </div>
+          <ul class="feature-list" id="feature-list"></ul>
+        </div>
+      </section>
+
+      <section class="section callout">
+        <p class="eyebrow">Interpretation rule</p>
+        <h2>Capability evidence is not performance evidence.</h2>
+        <p>A large limit does not mean an operation is fast, and an adapter feature does not imply every browser/device pair behaves identically. Performance claims belong in explicit measurements with environment metadata.</p>
+        <a class="button primary" href="../demo/">Use the live experiment</a>
+      </section>
+    </main>
+    <footer class="site-footer">Machine-specific adapter data is treated as canary evidence; deterministic repository tests should stay hardware-independent whenever possible.</footer>
+    <script type="module" src="../analysis.js"></script>
+  </body>
+</html>

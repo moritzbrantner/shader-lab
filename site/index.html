@@ -3,55 +3,73 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="Shader Lab is an experiment-driven place to understand GPU pipelines, shaders, wgpu, WebGPU, and rendering trade-offs."
-    />
-    <title>Shader Lab — GPU experiments with visible evidence</title>
+    <meta name="description" content="Shader Lab is an interactive WebGPU laboratory for learning GPU pipelines, WGSL, rendering, and hardware limits through visible experiments." />
+    <title>Shader Lab — interactive GPU experiments</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <header class="hero">
-        <p class="eyebrow">Rendering experiments · Rust · wgpu · WebGPU</p>
-        <h1>Shader Lab</h1>
-        <p class="lede">
-          A small laboratory for learning the GPU pipeline by building one visible experiment at a
-          time and keeping the evidence close to the code.
-        </p>
-        <nav class="actions" aria-label="Project links">
-          <a class="button primary" href="#webgpu-check">Inspect this browser</a>
-          <a class="button" href="https://github.com/moritzbrantner/shader-lab">Source on GitHub</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="./">shader-lab</a>
+        <nav class="site-nav" aria-label="Shader Lab">
+          <a href="./explain/">Explanation</a>
+          <a href="./demo/">Experiment</a>
+          <a href="./analysis/">Analysis</a>
+          <a href="https://github.com/moritzbrantner/shader-lab">GitHub</a>
         </nav>
-      </header>
+      </div>
+    </header>
 
-      <section class="pipeline" aria-labelledby="pipeline-title">
-        <div class="section-copy">
-          <p class="eyebrow">Mental model 01</p>
-          <h2 id="pipeline-title">A triangle is already a pipeline</h2>
-          <p>
-            Even the smallest GPU drawing crosses several boundaries. Shader Lab keeps those
-            boundaries explicit so later buffers, uniforms, textures, compute passes, and WASM do not
-            turn into unexplained machinery.
-          </p>
+    <main class="shell">
+      <section class="hero hero-grid">
+        <div>
+          <p class="eyebrow">Rust · wgpu · WGSL · WebGPU</p>
+          <h1>See what the GPU is doing.</h1>
+          <p class="lede">Shader Lab turns rendering concepts into small, inspectable experiments. Learn the pipeline, edit a real WGSL shader, and inspect the limits of the GPU adapter in your browser.</p>
+          <div class="actions">
+            <a class="button primary" href="./demo/">Run the shader experiment</a>
+            <a class="button" href="./explain/">Understand the pipeline</a>
+          </div>
         </div>
-        <ol class="pipeline-grid">
-          <li><span>1</span><strong>Surface</strong><p>Choose where rendered pixels will be presented.</p></li>
-          <li><span>2</span><strong>Device</strong><p>Request the GPU capabilities needed by the experiment.</p></li>
-          <li><span>3</span><strong>Pipeline</strong><p>Bind shader entry points, formats, primitive state, and resources.</p></li>
-          <li><span>4</span><strong>Encode</strong><p>Record render commands into a command buffer.</p></li>
-          <li><span>5</span><strong>Submit</strong><p>Queue the work and present the resulting frame.</p></li>
-        </ol>
+        <div class="hero-schematic" aria-label="CPU to GPU rendering pipeline">
+          <div><span>CPU</span><strong>uniforms + commands</strong></div>
+          <i aria-hidden="true">→</i>
+          <div><span>GPU</span><strong>vertex → fragment</strong></div>
+          <i aria-hidden="true">→</i>
+          <div><span>Surface</span><strong>present pixels</strong></div>
+        </div>
       </section>
 
-      <section class="capability" id="webgpu-check" aria-labelledby="capability-title">
+      <section class="section" aria-labelledby="surfaces-title">
         <div class="section-copy">
-          <p class="eyebrow">Live browser probe</p>
-          <h2 id="capability-title">Can this browser run the future web experiments?</h2>
-          <p>
-            The current Rust path is native <code>wgpu</code>. Browser experiments can later reuse
-            the same rendering concepts through WebGPU and, where it is useful, compile Rust to WASM.
-          </p>
+          <p class="eyebrow">Lab surfaces</p>
+          <h2 id="surfaces-title">The Collision Lab pattern, adapted for shaders</h2>
+          <p>Each surface answers a different question: explanation builds the mental model, experiment makes it tangible, and analysis exposes the machine-dependent boundary.</p>
+        </div>
+        <div class="cards three-up">
+          <a class="card card-link" href="./explain/">
+            <span>01 · Explanation</span>
+            <h3>Follow one frame</h3>
+            <p>Trace surface configuration, pipeline creation, uniforms, render passes, command submission, and presentation.</p>
+          </a>
+          <a class="card card-link" href="./demo/">
+            <span>02 · Experiment</span>
+            <h3>Edit WGSL live</h3>
+            <p>Compile a real shader in the browser, change fragment logic, animate uniforms, and see compiler diagnostics beside the result.</p>
+          </a>
+          <a class="card card-link" href="./analysis/">
+            <span>03 · Analysis</span>
+            <h3>Inspect the adapter</h3>
+            <p>Read WebGPU features and limits from the current browser/driver instead of assuming every GPU exposes the same envelope.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="section" id="webgpu-check" aria-labelledby="capability-title">
+        <div class="section-copy">
+          <p class="eyebrow">Live browser evidence</p>
+          <h2 id="capability-title">Can this browser run Shader Lab?</h2>
+          <p>The probe is deliberately small: it asks for an adapter and reports a few limits. The experiment page performs the real device, pipeline, uniform, and draw work.</p>
         </div>
         <div class="probe-card">
           <div class="probe-state">
@@ -61,40 +79,31 @@
               <p id="status-detail">Asking the browser whether a GPU adapter is available.</p>
             </div>
           </div>
-          <dl class="metrics" id="metrics" hidden>
+          <dl class="metrics four-up" id="metrics" hidden>
             <div><dt>Features</dt><dd id="feature-count">—</dd></div>
             <div><dt>Max bind groups</dt><dd id="max-bind-groups">—</dd></div>
             <div><dt>Max 2D texture</dt><dd id="max-texture-size">—</dd></div>
+            <div><dt>Canvas format</dt><dd id="canvas-format">—</dd></div>
           </dl>
         </div>
       </section>
 
-      <section class="experiments" aria-labelledby="experiments-title">
+      <section class="section" aria-labelledby="ladder-title">
         <div class="section-copy">
           <p class="eyebrow">Experiment ladder</p>
-          <h2 id="experiments-title">Grow complexity only when it teaches something</h2>
+          <h2 id="ladder-title">Grow the model one boundary at a time</h2>
         </div>
-        <div class="cards">
-          <article><span>Now</span><h3>Native triangle</h3><p>Surface lifecycle, device selection, WGSL entry points, render pass, presentation.</p></article>
-          <article><span>Next</span><h3>Vertex data</h3><p>Move geometry from implicit vertex indices into explicit buffers and layouts.</p></article>
-          <article><span>Then</span><h3>Uniforms</h3><p>Introduce changing data and make bind-group/resource ownership visible.</p></article>
-          <article><span>Later</span><h3>Browser parity</h3><p>Run equivalent WebGPU/WASM experiments and compare behavior, startup, and performance.</p></article>
-        </div>
-      </section>
-
-      <section class="principles" aria-labelledby="principles-title">
-        <div class="section-copy">
-          <p class="eyebrow">Lab rules</p>
-          <h2 id="principles-title">What counts as progress</h2>
-        </div>
-        <ul>
-          <li>Each experiment has one main question.</li>
-          <li>Pure shader and pipeline contracts are tested without requiring a physical GPU where possible.</li>
-          <li>Native and browser paths should share concepts and fixtures instead of silently diverging.</li>
-          <li>Performance claims need measurements, not intuition.</li>
-        </ul>
+        <ol class="pipeline-grid">
+          <li><span>1</span><strong>Triangle</strong><p>Surface, device, WGSL entry points, pass, draw, present.</p></li>
+          <li><span>2</span><strong>Uniforms</strong><p>Move time, resolution, and pointer data from CPU to GPU.</p></li>
+          <li><span>3</span><strong>Buffers</strong><p>Make vertex data and memory layout explicit.</p></li>
+          <li><span>4</span><strong>Textures</strong><p>Introduce sampling, formats, filtering, and resource lifetime.</p></li>
+          <li><span>5</span><strong>Compute</strong><p>Separate general GPU work from rasterization and compare costs.</p></li>
+        </ol>
       </section>
     </main>
+
+    <footer class="site-footer">Native wgpu remains the reference path; browser experiments expose the same concepts through WebGPU without hiding the GPU boundary.</footer>
     <script type="module" src="./app.js"></script>
   </body>
 </html>
