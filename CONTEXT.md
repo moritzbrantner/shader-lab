@@ -16,6 +16,8 @@ Learn and measure the GPU rendering pipeline by building progressively richer ex
 
 **Canary** — Hardware/driver-dependent verification that is useful evidence but does not define deterministic repository green.
 
-## Initial boundary
+## Presentation surfaces
 
-Native Rust is the first presentation surface. Browser/WASM work starts later, after the native concepts and experiment seams are stable enough to justify a second frontend.
+Native Rust with `wgpu` is the reference implementation path. The GitHub Pages lab is a companion presentation surface that can use browser WebGPU directly to explain the same contracts, run small visible experiments, edit WGSL, and inspect adapter capabilities.
+
+The browser path should remain transparent rather than becoming a second rendering framework. WASM comes later only when reusing Rust implementation across native and browser surfaces creates enough value to justify the additional build and runtime boundary.

@@ -4,7 +4,9 @@ A Rust + WebGPU laboratory for learning the graphics pipeline through small, ins
 
 ## Scope
 
-The native path uses `wgpu` and `winit`. Browser/WASM presentation is deliberately deferred until the native experiments are useful. The repository does not depend on Worldgen, Three-D, `rust-kernels`, `collision-lab`, or other `moritzbrantner/*` repositories during the initial four-PR horizon.
+Native Rust with `wgpu` and `winit` remains the reference implementation path. GitHub Pages is the companion learning surface: it may use browser WebGPU directly for explanations, small equivalent experiments, WGSL editing, and adapter analysis without hiding the GPU contracts being taught.
+
+Keep the browser path lightweight. React, Three.js, WASM, and dependencies on other `moritzbrantner/*` repositories should be added only when an experiment has a concrete need for them. In particular, WASM should earn its place by sharing useful Rust implementation rather than existing only as a browser bridge.
 
 ## Development
 
@@ -15,4 +17,18 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
+The static Pages lab can be served locally without a build step:
+
+```sh
+python3 -m http.server 8000 --directory site
+```
+
 Interactive rendering is a local/canary concern. The required deterministic gate must remain meaningful on machines without a physical GPU.
+
+## Pages lab
+
+The public lab follows three explicit surfaces:
+
+- `site/explain/` builds the rendering-pipeline mental model.
+- `site/demo/` compiles and renders editable WGSL through browser WebGPU.
+- `site/analysis/` reports machine-specific adapter features and limits as canary evidence.
