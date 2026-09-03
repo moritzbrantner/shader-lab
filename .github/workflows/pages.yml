@@ -21,7 +21,7 @@ jobs:
       pages: write
       id-token: write
       packages: read
-    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@workflow-standard-v1.3
+    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@3b15546083e66aeba487a2e653e3ffaacbfe7220 # workflow-standard-v1.3
     with:
       node_version: ""
       bun_version: ""
