@@ -7,16 +7,19 @@ fn triangle_shader_is_valid_wgsl_with_expected_entry_points() {
         Err(error) => panic!("triangle WGSL failed to parse: {error}"),
     };
 
-    assert!(
-        module
-            .entry_points
-            .iter()
-            .any(|entry| entry.name == "vs_main")
-    );
-    assert!(
-        module
-            .entry_points
-            .iter()
-            .any(|entry| entry.name == "fs_main")
-    );
+    if let Err(error) = naga::valid::Validator::new(
+        naga::valid::ValidationFlags::all(),
+        naga::valid::Capabilities::all(),
+    )
+    .validate(&module)
+    {
+        panic!("triangle WGSL failed semantic validation: {error}");
+    }
+
+    assert!(module.entry_points.iter().any(|entry| {
+        entry.name == "vs_main" && entry.stage == naga::ShaderStage::Vertex
+    }));
+    assert!(module.entry_points.iter().any(|entry| {
+        entry.name == "fs_main" && entry.stage == naga::ShaderStage::Fragment
+    }));
 }
