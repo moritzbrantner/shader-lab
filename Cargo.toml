@@ -5,6 +5,15 @@ edition = "2024"
 license = "MIT"
 rust-version = "1.98"
 
+[dependencies]
+env_logger = "0.11.11"
+pollster = "1.0.1"
+wgpu = "30.0.1"
+winit = "0.30.13"
+
+[dev-dependencies]
+naga = { version = "30.0.1", features = ["wgsl-in"] }
+
 [lints.rust]
 unsafe_code = "forbid"
 
