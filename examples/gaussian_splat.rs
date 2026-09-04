@@ -204,7 +204,8 @@ impl GpuState {
         self.config.width = size.width.max(1);
         self.config.height = size.height.max(1);
         let camera_bytes = encode_values(&camera_params(self.config.width, self.config.height));
-        self.queue.write_buffer(&self.camera_buffer, 0, &camera_bytes);
+        self.queue
+            .write_buffer(&self.camera_buffer, 0, &camera_bytes);
         self.surface.configure(&self.device, &self.config);
         self.window.request_redraw();
     }
