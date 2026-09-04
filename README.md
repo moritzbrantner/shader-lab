@@ -25,6 +25,15 @@ python3 -m http.server 8000 --directory site
 
 Interactive rendering is a local/canary concern. The required deterministic gate must remain meaningful on machines without a physical GPU.
 
+## Native experiments
+
+```sh
+cargo run --example vertex_buffer
+cargo run --example gaussian_splat
+```
+
+The Gaussian-splat experiment is intentionally a small 3DGS rendering baseline: projected 3D centers, perspective-scaled Gaussian footprints, deterministic back-to-front alpha compositing, and explicit GPU instance data. Full covariance projection, view-dependent spherical harmonics, large-scene loading, and GPU sorting remain later experiments rather than hidden complexity in the first slice.
+
 ## Pages lab
 
 The public lab follows three explicit surfaces:
