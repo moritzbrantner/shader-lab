@@ -18,7 +18,6 @@ const SPLAT_DATA: [[f32; 8]; 7] = [
     [-0.22, 0.62, -2.75, 0.28, 0.78, 0.42, 0.98, 0.82],
     [0.30, -0.02, -2.45, 0.34, 0.34, 0.92, 0.95, 0.78],
 ];
-const SPLAT_COUNT: u32 = SPLAT_DATA.len() as u32;
 const SPLAT_LAYOUT: wgpu::VertexBufferLayout<'static> = wgpu::VertexBufferLayout {
     array_stride: std::mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
     step_mode: wgpu::VertexStepMode::Instance,
@@ -49,9 +48,75 @@ fn encode_values(values: &[f32]) -> Vec<u8> {
 }
 
 fn camera_params(width: u32, height: u32) -> [f32; 4] {
-    let aspect = width.max(1) as f32 / height.max(1) as f32;
+    let width = u16::try_from(width.max(1)).unwrap_or(u16::MAX);
+    let height = u16::try_from(height.max(1)).unwrap_or(u16::MAX);
+    let aspect = f32::from(width) / f32::from(height);
     let focal = 1.0 / (0.5 * 55.0_f32.to_radians()).tan();
     [aspect, focal, 0.1, 100.0]
+}
+
+fn create_pipeline(
+    device: &wgpu::Device,
+    surface: &wgpu::Surface<'_>,
+    adapter: &wgpu::Adapter,
+) -> Result<(wgpu::RenderPipeline, wgpu::BindGroupLayout), String> {
+    let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        label: Some("gaussian-splat shader"),
+        source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(
+            "../shaders/gaussian-splat.wgsl"
+        ))),
+    });
+    let camera_bind_group_layout =
+        device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("gaussian-splat camera layout"),
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+        });
+    let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some("gaussian-splat pipeline layout"),
+        bind_group_layouts: &[Some(&camera_bind_group_layout)],
+        immediate_size: 0,
+    });
+    let format = surface
+        .get_capabilities(adapter)
+        .formats
+        .first()
+        .copied()
+        .ok_or_else(|| "surface reported no supported formats".to_owned())?;
+    let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some("gaussian-splat pipeline"),
+        layout: Some(&layout),
+        vertex: wgpu::VertexState {
+            module: &shader,
+            entry_point: Some("vs_main"),
+            buffers: &[Some(SPLAT_LAYOUT)],
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: &shader,
+            entry_point: Some("fs_main"),
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
+            targets: &[Some(wgpu::ColorTargetState {
+                format,
+                blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+                write_mask: wgpu::ColorWrites::ALL,
+            })],
+        }),
+        primitive: wgpu::PrimitiveState::default(),
+        depth_stencil: None,
+        multisample: wgpu::MultisampleState::default(),
+        multiview_mask: None,
+        cache: None,
+    });
+    Ok((pipeline, camera_bind_group_layout))
 }
 
 struct GpuState {
@@ -63,6 +128,7 @@ struct GpuState {
     config: wgpu::SurfaceConfiguration,
     pipeline: wgpu::RenderPipeline,
     splat_buffer: wgpu::Buffer,
+    splat_count: u32,
     camera_buffer: wgpu::Buffer,
     camera_bind_group: wgpu::BindGroup,
 }
@@ -102,63 +168,7 @@ impl GpuState {
             })
             .await
             .map_err(|error| error.to_string())?;
-
-        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("gaussian-splat shader"),
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(
-                "../shaders/gaussian-splat.wgsl"
-            ))),
-        });
-        let camera_bind_group_layout =
-            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                label: Some("gaussian-splat camera layout"),
-                entries: &[wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                }],
-            });
-        let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("gaussian-splat pipeline layout"),
-            bind_group_layouts: &[Some(&camera_bind_group_layout)],
-            immediate_size: 0,
-        });
-        let format = surface
-            .get_capabilities(&adapter)
-            .formats
-            .first()
-            .copied()
-            .ok_or_else(|| "surface reported no supported formats".to_owned())?;
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("gaussian-splat pipeline"),
-            layout: Some(&layout),
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: Some("vs_main"),
-                buffers: &[Some(SPLAT_LAYOUT)],
-                compilation_options: wgpu::PipelineCompilationOptions::default(),
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: Some("fs_main"),
-                compilation_options: wgpu::PipelineCompilationOptions::default(),
-                targets: &[Some(wgpu::ColorTargetState {
-                    format,
-                    blend: Some(wgpu::BlendState::ALPHA_BLENDING),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-            }),
-            primitive: wgpu::PrimitiveState::default(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            multiview_mask: None,
-            cache: None,
-        });
+        let (pipeline, camera_bind_group_layout) = create_pipeline(&device, &surface, &adapter)?;
 
         let splat_bytes = encode_rows(&SPLAT_DATA);
         let splat_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -166,6 +176,8 @@ impl GpuState {
             contents: &splat_bytes,
             usage: wgpu::BufferUsages::VERTEX,
         });
+        let splat_count = u32::try_from(SPLAT_DATA.len())
+            .map_err(|_| "splat count exceeds the GPU draw range".to_owned())?;
         let camera_bytes = encode_values(&camera_params(size.width, size.height));
         let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("gaussian-splat camera buffer"),
@@ -195,6 +207,7 @@ impl GpuState {
             config,
             pipeline,
             splat_buffer,
+            splat_count,
             camera_buffer,
             camera_bind_group,
         })
@@ -278,7 +291,7 @@ impl GpuState {
             pass.set_pipeline(&self.pipeline);
             pass.set_bind_group(0, &self.camera_bind_group, &[]);
             pass.set_vertex_buffer(0, self.splat_buffer.slice(..));
-            pass.draw(0..6, 0..SPLAT_COUNT);
+            pass.draw(0..6, 0..self.splat_count);
         }
 
         self.queue.submit(Some(encoder.finish()));
