@@ -1,5 +1,6 @@
 const TRIANGLE_SHADER: &str = include_str!("../shaders/triangle.wgsl");
 const VERTEX_BUFFER_SHADER: &str = include_str!("../shaders/vertex-buffer.wgsl");
+const GAUSSIAN_SPLAT_SHADER: &str = include_str!("../shaders/gaussian-splat.wgsl");
 
 fn parse_and_validate(label: &str, source: &str) -> naga::Module {
     let module = match naga::front::wgsl::parse_str(source) {
@@ -40,6 +41,14 @@ fn triangle_shader_is_valid_wgsl_with_expected_entry_points() {
 #[test]
 fn vertex_buffer_shader_is_valid_wgsl_with_expected_entry_points() {
     let module = parse_and_validate("vertex-buffer", VERTEX_BUFFER_SHADER);
+
+    assert_entry_point(&module, "vs_main", naga::ShaderStage::Vertex);
+    assert_entry_point(&module, "fs_main", naga::ShaderStage::Fragment);
+}
+
+#[test]
+fn gaussian_splat_shader_is_valid_wgsl_with_expected_entry_points() {
+    let module = parse_and_validate("gaussian-splat", GAUSSIAN_SPLAT_SHADER);
 
     assert_entry_point(&module, "vs_main", naga::ShaderStage::Vertex);
     assert_entry_point(&module, "fs_main", naga::ShaderStage::Fragment);
