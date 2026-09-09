@@ -29,8 +29,15 @@ for package in data.get('system', {}).get('apt', []):
 PY
   )
   if (( ${#apt_packages[@]} )); then
-    run_privileged apt-get update
-    run_privileged apt-get install -y --no-install-recommends "${apt_packages[@]}"
+    apt_source_args=()
+    if [[ -f /etc/apt/sources.list.d/ubuntu.sources ]]; then
+      apt_source_args=(
+        -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources
+        -o Dir::Etc::sourceparts=-
+      )
+    fi
+    run_privileged apt-get "${apt_source_args[@]}" update
+    run_privileged apt-get "${apt_source_args[@]}" install -y --no-install-recommends "${apt_packages[@]}"
   fi
 fi
 
