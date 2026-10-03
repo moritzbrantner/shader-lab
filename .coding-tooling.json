@@ -7,5 +7,9 @@
     "performance": ["benchmark:smoke"]
   },
   "requiredCapabilities": ["format:check", "lint", "build", "test"],
-  "optionalCapabilities": ["test:integration", "benchmark:smoke"]
+  "optionalCapabilities": ["test:integration", "benchmark:smoke"],
+  "merge": {
+    "authority": "hosted",
+    "requiredChecks": ["validate"]
+  }
 }
