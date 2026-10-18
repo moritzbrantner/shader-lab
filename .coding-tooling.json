@@ -2,14 +2,37 @@
   "schemaVersion": 1,
   "profile": "repository-foundation-v1",
   "tiers": {
-    "fast": ["format:check", "lint", "build", "test"],
-    "standard": ["format:check", "lint", "build", "test", "test:integration"],
-    "performance": ["benchmark:smoke"]
+    "fast": [
+      "format:check",
+      "lint",
+      "build",
+      "test"
+    ],
+    "standard": [
+      "format:check",
+      "lint",
+      "build",
+      "test",
+      "test:integration"
+    ],
+    "performance": [
+      "benchmark:smoke"
+    ]
   },
-  "requiredCapabilities": ["format:check", "lint", "build", "test"],
-  "optionalCapabilities": ["test:integration", "benchmark:smoke"],
+  "requiredCapabilities": [
+    "format:check",
+    "lint",
+    "build",
+    "test"
+  ],
+  "optionalCapabilities": [
+    "test:integration",
+    "benchmark:smoke"
+  ],
   "merge": {
     "authority": "hosted",
-    "requiredChecks": ["validate"]
+    "requiredChecks": [
+      "merge-ready"
+    ]
   }
 }
